@@ -266,7 +266,7 @@ function Invitation() {
       <LoveStory />
       <Events />
       <Venue />
-      <RSVP />
+      {/* <RSVP /> */}
       <GiftSection />
       <Wishes />
       <Closing />
