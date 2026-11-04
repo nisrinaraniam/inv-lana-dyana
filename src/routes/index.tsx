@@ -1,0 +1,1077 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Heart,
+  MapPin,
+  Calendar,
+  Clock,
+  Gift,
+  Copy,
+  Check,
+  Send,
+  Music2,
+  Music,
+  Sparkles,
+  Mail,
+  Cake,
+  ChevronDown,
+} from "lucide-react";
+
+import heroCouple from "@/assets/hero-couple.png";
+import cartoonBride from "@/assets/cartoon-bride.png";
+import cartoonGroom from "@/assets/cartoon-groom.png";
+import story1 from "@/assets/story-1.png";
+import story2 from "@/assets/story-2.png";
+import story3 from "@/assets/story-3.png";
+import story4 from "@/assets/story-4.png";
+
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Arum & Reza — Our Wedding Invitation" },
+      {
+        name: "description",
+        content:
+          "Save the date and celebrate with Arum & Reza — a little illustrated wedding invitation from us to you.",
+      },
+    ],
+  }),
+  component: Invitation,
+});
+
+const WEDDING_DATE = new Date("2026-11-14T09:00:00+07:00");
+const COUPLE = { bride: "Arum", groom: "Reza" };
+
+// ---------- Small building blocks ----------
+
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, shown };
+}
+
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const { ref, shown } = useReveal<HTMLDivElement>();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.9s ease-out ${delay}ms, transform 0.9s ease-out ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-center gap-3 text-cherry">
+      <span className="h-px w-10 bg-cherry/40" />
+      <span className="hand text-2xl">{children}</span>
+      <span className="h-px w-10 bg-cherry/40" />
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="serif mt-3 text-center text-4xl leading-tight text-ink sm:text-5xl">
+      {children}
+    </h2>
+  );
+}
+
+// A tiny hand-drawn divider
+function Divider() {
+  return (
+    <div className="my-8 flex items-center justify-center gap-3 text-cherry/60">
+      <svg width="80" height="12" viewBox="0 0 80 12" fill="none">
+        <path
+          d="M2 6 Q 20 -2, 40 6 T 78 6"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+      <Heart className="h-3.5 w-3.5 fill-cherry text-cherry" />
+      <svg width="80" height="12" viewBox="0 0 80 12" fill="none">
+        <path
+          d="M2 6 Q 20 14, 40 6 T 78 6"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// ---------- Floating decor ----------
+
+function FloatingHearts({ count = 6 }: { count?: number }) {
+  const hearts = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        left: 6 + ((i * 17) % 88),
+        delay: (i * 0.9) % 5,
+        size: 12 + ((i * 7) % 10),
+        opacity: 0.5 + ((i * 13) % 40) / 100,
+      })),
+    [count],
+  );
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {hearts.map((h, i) => (
+        <Heart
+          key={i}
+          className="animate-heart absolute bottom-0 fill-cherry/70 text-cherry/70"
+          style={{
+            left: `${h.left}%`,
+            width: h.size,
+            height: h.size,
+            animationDelay: `${h.delay}s`,
+            opacity: h.opacity,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Clouds() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {[0, 1, 2].map((i) => (
+        <svg
+          key={i}
+          className="animate-drift absolute text-white/80"
+          style={{
+            top: `${8 + i * 14}%`,
+            animationDuration: `${50 + i * 20}s`,
+            animationDelay: `${-i * 12}s`,
+            width: 120 + i * 40,
+            filter: "drop-shadow(0 6px 10px rgba(180,80,80,0.08))",
+          }}
+          viewBox="0 0 120 40"
+          fill="currentColor"
+        >
+          <path d="M20 30 Q 10 30 10 22 Q 10 14 20 14 Q 22 6 32 8 Q 40 2 50 10 Q 62 6 66 16 Q 78 16 78 24 Q 78 32 66 30 Z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+// ---------- Countdown ----------
+
+function useCountdown(target: Date) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  if (now === null) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const diff = Math.max(0, target.getTime() - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff / 3600000) % 24);
+  const minutes = Math.floor((diff / 60000) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  return { days, hours, minutes, seconds };
+}
+
+function Countdown() {
+  const { days, hours, minutes, seconds } = useCountdown(WEDDING_DATE);
+  const items = [
+    { label: "Days", value: days },
+    { label: "Hours", value: hours },
+    { label: "Minutes", value: minutes },
+    { label: "Seconds", value: seconds },
+  ];
+  return (
+    <div className="mx-auto grid max-w-md grid-cols-4 gap-2 sm:gap-3">
+      {items.map((it) => (
+        <div
+          key={it.label}
+          className="paper flex flex-col items-center rounded-2xl px-2 py-3 sm:py-4"
+        >
+          <div className="serif text-2xl text-cherry sm:text-3xl">
+            {String(it.value).padStart(2, "0")}
+          </div>
+          <div className="mt-1 text-[10px] uppercase tracking-widest text-ink-soft sm:text-xs">
+            {it.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- Main page ----------
+
+function Invitation() {
+  const [opened, setOpened] = useState(false);
+  const [music, setMusic] = useState(false);
+  const guest = useGuestName();
+
+  // Lock scroll before opening
+  useEffect(() => {
+    if (!opened) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [opened]);
+
+  return (
+    <div className="relative min-h-screen bg-ivory text-ink">
+      {!opened && <CoverGate guest={guest} onOpen={() => setOpened(true)} />}
+
+      {opened && <MusicToggle on={music} onToggle={() => setMusic((m) => !m)} />}
+
+      <Hero guest={guest} />
+      <Couple />
+      <LoveStory />
+      <Events />
+      <Venue />
+      <RSVP />
+      <GiftSection />
+      <Wishes />
+      <Closing />
+    </div>
+  );
+}
+
+// ---------- Cover gate ----------
+
+function useGuestName() {
+  const [name, setName] = useState("Dear Guest");
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const to = p.get("to") || p.get("guest");
+      if (to) setName(decodeURIComponent(to));
+    } catch {
+      // ignore
+    }
+  }, []);
+  return name;
+}
+
+function CoverGate({ guest, onOpen }: { guest: string; onOpen: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-ivory via-blush-soft to-cream px-6">
+      <Clouds />
+      <div className="animate-fade-up relative z-10 flex max-w-md flex-col items-center text-center">
+        <span className="hand text-2xl text-cherry">The Wedding of</span>
+        <h1 className="serif mt-2 text-5xl leading-tight text-ink sm:text-6xl">
+          {COUPLE.bride}
+          <span className="mx-3 inline-block align-middle text-cherry">&</span>
+          {COUPLE.groom}
+        </h1>
+        <div className="mt-4 flex items-center gap-2 text-sm text-ink-soft">
+          <Calendar className="h-4 w-4 text-cherry" />
+          <span>Saturday · November 14, 2026</span>
+        </div>
+
+        <div className="animate-float relative mt-6">
+          <img
+            src={heroCouple}
+            alt="Cartoon of the bride and groom waving"
+            width={260}
+            height={260}
+            className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+          />
+        </div>
+
+        <p className="hand mt-4 text-3xl text-cherry">{guest}</p>
+
+        <button
+          onClick={onOpen}
+          className="animate-soft-pulse mt-6 inline-flex items-center gap-2 rounded-full bg-cherry px-7 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-cherry/25 transition hover:brightness-110"
+        >
+          <Mail className="h-4 w-4" />
+          Open Invitation
+        </button>
+        <div className="mt-6 flex items-center gap-1 text-xs text-ink-soft/70">
+          <ChevronDown className="h-3 w-3" />
+          scroll gently
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MusicToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      aria-label="Toggle music"
+      className="paper fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full text-cherry"
+    >
+      {on ? <Music2 className="h-5 w-5 animate-spin-slow" /> : <Music className="h-5 w-5" />}
+    </button>
+  );
+}
+
+// ---------- Hero ----------
+
+function Hero({ guest }: { guest: string }) {
+  return (
+    <section
+      id="hero"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-ivory via-blush-soft/60 to-cream px-4 py-16"
+    >
+      <Clouds />
+      <FloatingHearts count={5} />
+
+      <Reveal className="relative z-10 text-center">
+        <SectionLabel>The Wedding of</SectionLabel>
+        <h1 className="serif mt-4 text-6xl leading-none text-ink sm:text-7xl md:text-8xl">
+          {COUPLE.bride}
+          <span className="mx-2 text-cherry">&</span>
+          {COUPLE.groom}
+        </h1>
+        <p className="mt-4 text-sm text-ink-soft">
+          To our dearest{" "}
+          <span className="hand text-lg text-cherry">{guest}</span>, with love —
+        </p>
+      </Reveal>
+
+      <div className="relative z-10 mt-6 flex items-end justify-center">
+        <div className="relative">
+          <img
+            src={heroCouple}
+            alt="Illustrated bride and groom waving"
+            width={520}
+            height={520}
+            className="h-64 w-64 object-contain drop-shadow-xl sm:h-80 sm:w-80 md:h-96 md:w-96"
+          />
+          {/* waving hand hearts */}
+          <Heart className="animate-float-sm absolute -left-6 top-6 h-6 w-6 fill-cherry text-cherry" />
+          <Heart
+            className="animate-float-sm absolute -right-4 top-16 h-4 w-4 fill-blush text-blush"
+            style={{ animationDelay: "1.2s" }}
+          />
+          <Sparkles className="absolute right-10 top-0 h-5 w-5 text-cherry-soft" />
+        </div>
+      </div>
+
+      <Reveal delay={200} className="relative z-10 mt-8 w-full max-w-md text-center">
+        <p className="serif text-lg text-ink">
+          Saturday, 14 November 2026
+        </p>
+        <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">
+          Jakarta · Indonesia
+        </p>
+        <div className="mt-6">
+          <Countdown />
+        </div>
+      </Reveal>
+
+      <Reveal delay={400} className="relative z-10 mt-10 flex flex-col items-center gap-2">
+        <a
+          href="#story"
+          className="inline-flex items-center gap-2 rounded-full border border-cherry/30 bg-white/60 px-6 py-2.5 text-sm text-cherry backdrop-blur transition hover:bg-white"
+        >
+          Read our story
+          <ChevronDown className="h-4 w-4" />
+        </a>
+      </Reveal>
+    </section>
+  );
+}
+
+// ---------- Couple ----------
+
+function Couple() {
+  const items = [
+    {
+      role: "The Bride",
+      name: "Arum Kartika Dewi",
+      parents: "Daughter of Bpk. Suryanto & Ibu Melati",
+      cartoon: cartoonBride,
+      tape: "-6deg",
+    },
+    {
+      role: "The Groom",
+      name: "Reza Aditya Pratama",
+      parents: "Son of Bpk. Hendra & Ibu Ratna",
+      cartoon: cartoonGroom,
+      tape: "4deg",
+    },
+  ];
+  return (
+    <section id="couple" className="relative px-4 py-24 sm:py-28">
+      <Reveal>
+        <SectionLabel>with joy, we introduce</SectionLabel>
+        <SectionTitle>The Bride & Groom</SectionTitle>
+        <p className="mx-auto mt-4 max-w-lg text-center text-sm leading-relaxed text-ink-soft">
+          Two little hearts, one big adventure. Meet the humans (and their tiny
+          cartoon versions) behind this celebration.
+        </p>
+      </Reveal>
+
+      <Divider />
+
+      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2">
+        {items.map((p, i) => (
+          <Reveal key={p.role} delay={i * 150}>
+            <div className="paper relative rounded-[2rem] p-6 sm:p-8">
+              <span
+                className="tape-strip -top-2 left-8"
+                style={{ transform: `rotate(${p.tape})` }}
+              />
+              <div className="relative grid aspect-[4/5] place-items-center overflow-hidden rounded-2xl bg-blush-soft">
+                <FloatingHearts count={3} />
+                <span className="absolute left-6 top-8 h-20 w-20 rounded-full border border-cherry/10" />
+                <span className="absolute bottom-10 right-7 h-12 w-12 rounded-full border border-cherry/10" />
+                <img
+                  src={p.cartoon}
+                  alt={`Cartoon of ${p.name}`}
+                  width={420}
+                  height={420}
+                  loading="lazy"
+                  className="animate-float relative z-10 h-56 w-56 object-contain drop-shadow-md sm:h-64 sm:w-64"
+                />
+                <Sparkles className="animate-soft-pulse absolute right-8 top-8 h-6 w-6 text-cherry" />
+              </div>
+              <div className="mt-6 text-center">
+                <span className="hand text-xl text-cherry">{p.role}</span>
+                <h3 className="serif mt-1 text-3xl text-ink">{p.name}</h3>
+                <p className="mt-2 text-sm text-ink-soft">{p.parents}</p>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---------- Love Story ----------
+
+function LoveStory() {
+  const scenes = [
+    {
+      date: "March 2022",
+      title: "First Meeting",
+      text: "A shy hello at a tiny café. Two coffees, one very awkward laugh.",
+      img: story1,
+    },
+    {
+      date: "August 2022",
+      title: "First Date",
+      text: "Cherry blossoms and holding hands. Definitely, absolutely, official.",
+      img: story2,
+    },
+    {
+      date: "December 2024",
+      title: "The Proposal",
+      text: "One knee, one ring, and a whole lot of happy tears.",
+      img: story3,
+    },
+    {
+      date: "November 2026",
+      title: "Our Wedding",
+      text: "Today — we say yes, forever and always.",
+      img: story4,
+    },
+  ];
+
+  return (
+    <section
+      id="story"
+      className="relative overflow-hidden bg-blush-soft/40 px-4 py-24 sm:py-28"
+    >
+      <Reveal>
+        <SectionLabel>chapter by chapter</SectionLabel>
+        <SectionTitle>Our Little Love Story</SectionTitle>
+      </Reveal>
+
+      <Divider />
+
+      <div className="relative -mx-4 overflow-x-auto pb-4">
+        <div className="mx-auto flex w-max gap-6 px-6 sm:gap-8">
+          {scenes.map((s, i) => (
+            <Reveal key={s.title} delay={i * 120}>
+              <article className="paper relative w-[280px] shrink-0 rounded-3xl p-5 sm:w-[320px]">
+                <span
+                  className="tape-strip -top-3"
+                  style={{ left: `${20 + i * 8}%` }}
+                />
+                <div className="overflow-hidden rounded-2xl bg-ivory">
+                  <img
+                    src={s.img}
+                    alt={s.title}
+                    width={900}
+                    height={900}
+                    loading="lazy"
+                    className="animate-float-sm aspect-square w-full object-contain p-2"
+                    style={{ animationDelay: `${i * 0.4}s` }}
+                  />
+                </div>
+                <div className="mt-4">
+                  <span className="hand text-lg text-cherry">{s.date}</span>
+                  <h3 className="serif mt-1 text-2xl text-ink">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                    {s.text}
+                  </p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+
+      <p className="mt-4 text-center text-xs text-ink-soft/70">
+        ← swipe to keep reading →
+      </p>
+    </section>
+  );
+}
+
+// ---------- Events ----------
+
+function Events() {
+  const events = [
+    {
+      title: "Akad Nikah",
+      icon: <Heart className="h-5 w-5 fill-cherry text-cherry" />,
+      date: "Saturday, 14 November 2026",
+      time: "09:00 – 11:00 WIB",
+      place: "Griya Melati Hall",
+      note: "An intimate ceremony with family & close friends.",
+    },
+    {
+      title: "Resepsi",
+      icon: <Cake className="h-5 w-5 text-cherry" />,
+      date: "Saturday, 14 November 2026",
+      time: "18:00 – 22:00 WIB",
+      place: "Griya Melati Grand Ballroom",
+      note: "Dinner, dancing, and a lot of cake.",
+    },
+  ];
+  return (
+    <section
+      id="events"
+      className="relative overflow-hidden bg-cream/60 px-4 py-24 sm:py-28"
+    >
+      <FloatingHearts count={4} />
+      <Reveal>
+        <SectionLabel>save the day</SectionLabel>
+        <SectionTitle>Wedding Events</SectionTitle>
+      </Reveal>
+      <Divider />
+      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+        {events.map((e, i) => (
+          <Reveal key={e.title} delay={i * 150}>
+            <div className="paper relative rounded-[2rem] p-7 text-center">
+              <span
+                className="tape-strip -top-3 left-1/2 -translate-x-1/2"
+                style={{ transform: "translateX(-50%) rotate(-3deg)" }}
+              />
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blush-soft">
+                {e.icon}
+              </div>
+              <h3 className="serif mt-4 text-3xl text-ink">{e.title}</h3>
+              <div className="mt-5 space-y-2 text-sm text-ink-soft">
+                <p className="flex items-center justify-center gap-2">
+                  <Calendar className="h-4 w-4 text-cherry" />
+                  {e.date}
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <Clock className="h-4 w-4 text-cherry" />
+                  {e.time}
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <MapPin className="h-4 w-4 text-cherry" />
+                  {e.place}
+                </p>
+              </div>
+              <p className="hand mt-4 text-lg text-cherry">{e.note}</p>
+              <button className="mt-5 inline-flex items-center gap-2 rounded-full border border-cherry/30 px-5 py-2 text-sm text-cherry transition hover:bg-cherry hover:text-primary-foreground">
+                <Calendar className="h-4 w-4" />
+                Add to Calendar
+              </button>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---------- Venue ----------
+
+function Venue() {
+  return (
+    <section id="venue" className="relative px-4 py-24 sm:py-28">
+      <Reveal>
+        <SectionLabel>find your way</SectionLabel>
+        <SectionTitle>The Venue</SectionTitle>
+      </Reveal>
+      <Divider />
+
+      <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2">
+        <Reveal>
+          <div className="paper relative grid min-h-80 place-items-center overflow-hidden rounded-[2rem] p-8">
+            <span className="tape-strip -top-3 left-6" />
+            <FloatingHearts count={4} />
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="animate-float grid h-28 w-28 place-items-center rounded-full bg-blush-soft shadow-lg shadow-cherry/10">
+                <MapPin className="h-12 w-12 text-cherry" />
+              </div>
+              <div className="mt-5 flex items-center gap-3 text-cherry/50">
+                <span className="h-px w-16 bg-cherry/30" />
+                <Heart className="animate-soft-pulse h-4 w-4 fill-cherry text-cherry" />
+                <span className="h-px w-16 bg-cherry/30" />
+              </div>
+              <p className="hand mt-4 text-2xl text-cherry">meet us here</p>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={120}>
+          <div className="space-y-5">
+            <div>
+              <span className="hand text-xl text-cherry">Griya Melati</span>
+              <h3 className="serif mt-1 text-3xl text-ink">
+                Grand Ballroom & Garden
+              </h3>
+            </div>
+            <p className="text-sm leading-relaxed text-ink-soft">
+              Jl. Cendana Kasih No. 88, Menteng, Jakarta Pusat 10310,
+              Indonesia.
+            </p>
+
+            <div className="paper rounded-2xl p-4 text-sm text-ink-soft">
+              <p className="mb-2 flex items-center gap-2 text-ink">
+                <Sparkles className="h-4 w-4 text-cherry" /> Travel tips
+              </p>
+              <ul className="ml-1 list-disc space-y-1 pl-4">
+                <li>Parking available on-site (valet from 17:00).</li>
+                <li>5 min from Gondangdia MRT · 15 min from Sudirman.</li>
+                <li>Please arrive 20 minutes before the ceremony 🌸</li>
+              </ul>
+            </div>
+
+            <a
+              href="https://maps.google.com/?q=Jakarta"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-cherry px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-cherry/25 transition hover:brightness-110"
+            >
+              <MapPin className="h-4 w-4" />
+              Open in Google Maps
+            </a>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ---------- RSVP ----------
+
+function RSVP() {
+  const [name, setName] = useState("");
+  const [attend, setAttend] = useState<"yes" | "no" | "">("");
+  const [guests, setGuests] = useState(1);
+  const [sent, setSent] = useState(false);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !attend) return;
+    setSent(true);
+  };
+
+  return (
+    <section id="rsvp" className="relative px-4 py-24 sm:py-28">
+      <Reveal>
+        <SectionLabel>please let us know</SectionLabel>
+        <SectionTitle>Kindly RSVP</SectionTitle>
+      </Reveal>
+      <Divider />
+
+      <Reveal className="mx-auto max-w-lg">
+        <form
+          onSubmit={submit}
+          className="paper relative rounded-[2rem] p-6 sm:p-8"
+        >
+          <span className="tape-strip -top-3 left-6" />
+          {sent ? (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-cherry text-primary-foreground">
+                <Check className="h-6 w-6" />
+              </div>
+              <h3 className="serif text-2xl text-ink">Thank you, {name}!</h3>
+              <p className="text-sm text-ink-soft">
+                Your reply has been noted. We can’t wait to celebrate with you 🌸
+              </p>
+            </div>
+          ) : (
+            <>
+              <label className="mb-1 block text-xs uppercase tracking-widest text-ink-soft">
+                Your name
+              </label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Nara Prameswari"
+                className="w-full rounded-2xl border border-border bg-ivory px-4 py-3 text-sm outline-none transition focus:border-cherry"
+              />
+
+              <label className="mb-1 mt-5 block text-xs uppercase tracking-widest text-ink-soft">
+                Will you be there?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    { v: "yes", label: "Yes, with love 💌" },
+                    { v: "no", label: "Sadly, cannot" },
+                  ] as const
+                ).map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setAttend(o.v)}
+                    className={`rounded-2xl border px-4 py-3 text-sm transition ${
+                      attend === o.v
+                        ? "border-cherry bg-cherry text-primary-foreground"
+                        : "border-border bg-ivory text-ink hover:border-cherry/60"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+
+              {attend === "yes" && (
+                <>
+                  <label className="mb-1 mt-5 block text-xs uppercase tracking-widest text-ink-soft">
+                    Number of guests
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                      className="h-10 w-10 rounded-full border border-border text-lg text-cherry"
+                    >
+                      −
+                    </button>
+                    <div className="paper flex-1 rounded-2xl py-2.5 text-center serif text-xl">
+                      {guests}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setGuests((g) => Math.min(5, g + 1))}
+                      className="h-10 w-10 rounded-full border border-border text-lg text-cherry"
+                    >
+                      +
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <button
+                type="submit"
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cherry px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-cherry/25 transition hover:brightness-110 disabled:opacity-40"
+                disabled={!name || !attend}
+              >
+                <Send className="h-4 w-4" />
+                Send my RSVP
+              </button>
+            </>
+          )}
+        </form>
+      </Reveal>
+    </section>
+  );
+}
+
+// ---------- Gift ----------
+
+function GiftSection() {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copy = (v: string, key: string) => {
+    navigator.clipboard?.writeText(v);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  const accounts = [
+    { bank: "BCA", num: "1234567890", name: "Arum Kartika Dewi" },
+    { bank: "Mandiri", num: "0987654321", name: "Reza Aditya Pratama" },
+  ];
+
+  return (
+    <section
+      id="gift"
+      className="relative overflow-hidden bg-cream/60 px-4 py-24 sm:py-28"
+    >
+      <Reveal>
+        <SectionLabel>with gratitude</SectionLabel>
+        <SectionTitle>Wedding Gift</SectionTitle>
+        <p className="mx-auto mt-4 max-w-md text-center text-sm text-ink-soft">
+          Your presence is our greatest gift. If you wish to send a token of
+          love, this little envelope is for you.
+        </p>
+      </Reveal>
+      <Divider />
+
+      <Reveal className="mx-auto max-w-md">
+        <div className="relative">
+          {/* Envelope */}
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="paper relative block w-full overflow-hidden rounded-[2rem] p-8 text-left transition hover:-translate-y-1"
+          >
+            <div className="flex items-center gap-4">
+              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-cherry text-primary-foreground">
+                <Gift className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="hand text-xl text-cherry">a little envelope</p>
+                <h3 className="serif text-2xl text-ink">
+                  {open ? "Tap to close" : "Tap to open"}
+                </h3>
+              </div>
+            </div>
+            <Heart className="absolute right-6 top-6 h-5 w-5 fill-cherry text-cherry animate-float-sm" />
+          </button>
+
+          {open && (
+            <div className="animate-fade-up mt-4 space-y-3">
+              {accounts.map((a) => (
+                <div key={a.bank} className="paper rounded-2xl p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-ink-soft">
+                        {a.bank}
+                      </p>
+                      <p className="serif text-lg text-ink">{a.num}</p>
+                      <p className="text-xs text-ink-soft">a.n. {a.name}</p>
+                    </div>
+                    <button
+                      onClick={() => copy(a.num, a.bank)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-cherry/30 px-3 py-1.5 text-xs text-cherry hover:bg-cherry hover:text-primary-foreground"
+                    >
+                      {copied === a.bank ? (
+                        <>
+                          <Check className="h-3.5 w-3.5" /> Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" /> Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <div className="paper flex items-center justify-between rounded-2xl p-4">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-ink-soft">
+                    QRIS
+                  </p>
+                  <p className="serif text-lg text-ink">Scan to send love</p>
+                </div>
+                <div className="grid h-20 w-20 place-items-center rounded-xl bg-white p-2 shadow-inner">
+                  <QrDoodle />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function QrDoodle() {
+  // Decorative faux QR made of cells
+  const cells = Array.from({ length: 49 }, (_, i) => (i * 7 + 3) % 5 !== 0);
+  return (
+    <div className="grid h-full w-full grid-cols-7 gap-[2px]">
+      {cells.map((on, i) => (
+        <div
+          key={i}
+          className={on ? "bg-ink" : "bg-transparent"}
+          style={{ borderRadius: 1 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ---------- Wishes ----------
+
+type Wish = { name: string; msg: string; color: string };
+
+function Wishes() {
+  const [wishes, setWishes] = useState<Wish[]>([
+    {
+      name: "Nadia",
+      msg: "Selamat! Semoga langgeng dan penuh cinta selalu 💕",
+      color: "bg-blush-soft",
+    },
+    {
+      name: "Bima",
+      msg: "So so happy for you both. Can’t wait to celebrate!",
+      color: "bg-cream",
+    },
+    {
+      name: "Sinta",
+      msg: "May every day feel like your favorite storybook page ✨",
+      color: "bg-blush",
+    },
+  ]);
+  const [name, setName] = useState("");
+  const [msg, setMsg] = useState("");
+
+  const rot = (i: number) => (i % 2 === 0 ? -2 : 2) + ((i * 3) % 3);
+
+  const add = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !msg) return;
+    const colors = ["bg-blush-soft", "bg-cream", "bg-blush", "bg-cherry/20"];
+    setWishes((w) => [
+      { name, msg, color: colors[w.length % colors.length] },
+      ...w,
+    ]);
+    setName("");
+    setMsg("");
+  };
+
+  return (
+    <section id="wishes" className="relative px-4 py-24 sm:py-28">
+      <Reveal>
+        <SectionLabel>leave a little note</SectionLabel>
+        <SectionTitle>Guest Wishes</SectionTitle>
+      </Reveal>
+      <Divider />
+
+      <Reveal className="mx-auto max-w-lg">
+        <form
+          onSubmit={add}
+          className="paper mb-10 rounded-[2rem] p-5 sm:p-6"
+        >
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              className="rounded-2xl border border-border bg-ivory px-4 py-3 text-sm outline-none focus:border-cherry"
+            />
+            <span />
+          </div>
+          <textarea
+            value={msg}
+            onChange={(e) => setMsg(e.target.value)}
+            placeholder="Write a little wish…"
+            rows={3}
+            className="mt-3 w-full rounded-2xl border border-border bg-ivory px-4 py-3 text-sm outline-none focus:border-cherry"
+          />
+          <button
+            type="submit"
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-cherry px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-cherry/25 hover:brightness-110 disabled:opacity-40"
+            disabled={!name || !msg}
+          >
+            <Send className="h-4 w-4" /> Send a wish
+          </button>
+        </form>
+      </Reveal>
+
+      <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {wishes.map((w, i) => (
+          <Reveal key={i} delay={i * 80}>
+            <div
+              className={`relative rounded-2xl ${w.color} p-5 shadow-md`}
+              style={{ transform: `rotate(${rot(i)}deg)` }}
+            >
+              <span
+                className="tape-strip -top-2 left-1/2"
+                style={{ transform: "translateX(-50%) rotate(-6deg)" }}
+              />
+              <p className="serif text-sm leading-relaxed text-ink">“{w.msg}”</p>
+              <p className="hand mt-3 text-lg text-cherry">— {w.name}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---------- Closing ----------
+
+function Closing() {
+  return (
+    <section
+      id="closing"
+      className="relative overflow-hidden bg-gradient-to-b from-blush-soft/40 via-ivory to-cream px-4 py-28 text-center"
+    >
+      <FloatingHearts count={8} />
+      <Clouds />
+      <Reveal className="relative z-10 mx-auto max-w-2xl">
+        <SectionLabel>with all our love</SectionLabel>
+        <h2 className="serif mt-4 text-5xl leading-tight text-ink sm:text-6xl">
+          Thank you, from the <br />
+          <span className="text-cherry">bottom of our hearts</span>
+        </h2>
+        <img
+          src={heroCouple}
+          alt="Bride and groom waving thank you"
+          width={520}
+          height={520}
+          className="animate-float mx-auto mt-8 h-64 w-64 object-contain sm:h-80 sm:w-80"
+        />
+        <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-ink-soft">
+          Your presence, prayers, and warm wishes mean the world to us. See you
+          soon — with cake, confetti, and a very tight hug.
+        </p>
+        <p className="hand mt-6 text-4xl text-cherry">
+          {COUPLE.bride} <Heart className="mx-1 inline h-6 w-6 fill-cherry" /> {COUPLE.groom}
+        </p>
+        <p className="mt-8 text-xs uppercase tracking-[0.3em] text-ink-soft/70">
+          Jakarta · 14.11.2026
+        </p>
+      </Reveal>
+    </section>
+  );
+}
