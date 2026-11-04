@@ -15,6 +15,7 @@ import {
   Mail,
   Cake,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 
 import heroCouple from "@/assets/hero-couple.png";
@@ -980,41 +981,104 @@ function QrDoodle() {
 
 // ---------- Wishes ----------
 
-type Wish = { name: string; msg: string; color: string };
+const GOOGLE_SCRIPT_WISHES_URL =
+  "https://script.google.com/macros/s/AKfycbynKXlR6IdpEOKNk2q0NmqyfU3PaOZTE40-2iOsfqbNAhohGk-eGtB7ZcVaisbTt0MC/exec";
+
+type Wish = { name: string; msg: string; color: string; date?: string };
+
+const WISH_COLORS = ["bg-blush-soft", "bg-cream", "bg-blush", "bg-cherry/20"];
 
 function Wishes() {
-  const [wishes, setWishes] = useState<Wish[]>([
-    {
-      name: "Nadia",
-      msg: "Selamat! Semoga langgeng dan penuh cinta selalu 💕",
-      color: "bg-blush-soft",
-    },
-    {
-      name: "Bima",
-      msg: "So so happy for you both. Can’t wait to celebrate!",
-      color: "bg-cream",
-    },
-    {
-      name: "Sinta",
-      msg: "May every day feel like your favorite storybook page ✨",
-      color: "bg-blush",
-    },
-  ]);
+  const [wishes, setWishes] = useState<Wish[]>([]);
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Load existing wishes from Google Sheets
+  useEffect(() => {
+    let isMounted = true;
+    fetch(GOOGLE_SCRIPT_WISHES_URL)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isMounted) return;
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+            ? data.data
+            : Array.isArray(data?.wishes)
+              ? data.wishes
+              : [];
+        const parsed: Wish[] = list
+          .map((item: any, i: number) => ({
+            name: item.name || item.nama || item.Nama || "Tamu",
+            msg:
+              item.msg ||
+              item.message ||
+              item.ucapan ||
+              item.Ucapan ||
+              item.pesan ||
+              item.Pesan ||
+              "",
+            date: item.date || item.tanggal || item.timestamp || "",
+            color: WISH_COLORS[i % WISH_COLORS.length],
+          }))
+          .filter((w: Wish) => w.msg);
+        setWishes(parsed);
+      })
+      .catch((err) => {
+        console.warn("Could not load wishes from Google Apps Script:", err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const rot = (i: number) => (i % 2 === 0 ? -2 : 2) + ((i * 3) % 3);
 
-  const add = (e: React.FormEvent) => {
+  const add = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !msg) return;
-    const colors = ["bg-blush-soft", "bg-cream", "bg-blush", "bg-cherry/20"];
-    setWishes((w) => [
-      { name, msg, color: colors[w.length % colors.length] },
-      ...w,
-    ]);
+    if (!name.trim() || !msg.trim() || submitting) return;
+
+    const trimmedName = name.trim();
+    const trimmedMsg = msg.trim();
+
+    const newWish: Wish = {
+      name: trimmedName,
+      msg: trimmedMsg,
+      color: WISH_COLORS[wishes.length % WISH_COLORS.length],
+    };
+
+    // Optimistically update UI
+    setWishes((prev) => [newWish, ...prev]);
     setName("");
     setMsg("");
+    setSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("name", trimmedName);
+      formData.append("nama", trimmedName);
+      formData.append("msg", trimmedMsg);
+      formData.append("message", trimmedMsg);
+      formData.append("ucapan", trimmedMsg);
+      formData.append("pesan", trimmedMsg);
+      formData.append("timestamp", new Date().toISOString());
+
+      await fetch(GOOGLE_SCRIPT_WISHES_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData,
+      });
+    } catch (err) {
+      console.error("Failed to post wish to Google Apps Script:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -1048,31 +1112,55 @@ function Wishes() {
           />
           <button
             type="submit"
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-cherry px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-cherry/25 hover:brightness-110 disabled:opacity-40"
-            disabled={!name || !msg}
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-cherry px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md shadow-cherry/25 hover:brightness-110 disabled:opacity-50"
+            disabled={!name.trim() || !msg.trim() || submitting}
           >
-            <Send className="h-4 w-4" /> Send a wish
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" /> Send a wish
+              </>
+            )}
           </button>
         </form>
       </Reveal>
 
-      <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {wishes.map((w, i) => (
-          <Reveal key={i} delay={i * 80}>
-            <div
-              className={`relative rounded-2xl ${w.color} p-5 shadow-md`}
-              style={{ transform: `rotate(${rot(i)}deg)` }}
-            >
-              <span
-                className="tape-strip -top-2 left-1/2"
-                style={{ transform: "translateX(-50%) rotate(-6deg)" }}
-              />
-              <p className="serif text-sm leading-relaxed text-ink">“{w.msg}”</p>
-              <p className="hand mt-3 text-lg text-cherry">— {w.name}</p>
-            </div>
-          </Reveal>
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-10 text-ink-soft">
+          <Loader2 className="mb-2 h-6 w-6 animate-spin text-cherry" />
+          <p className="text-sm">Memuat ucapan doa restu…</p>
+        </div>
+      ) : wishes.length === 0 ? (
+        <div className="paper mx-auto max-w-md rounded-2xl p-6 text-center text-ink-soft">
+          <Heart className="mx-auto mb-2 h-6 w-6 fill-cherry/20 text-cherry/60" />
+          <p className="text-sm">Belum ada ucapan doa restu.</p>
+          <p className="hand mt-1 text-lg text-cherry">
+            Jadilah yang pertama menuliskan doa untuk Lana &amp; Dyana! ✨
+          </p>
+        </div>
+      ) : (
+        <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {wishes.map((w, i) => (
+            <Reveal key={i} delay={i * 80}>
+              <div
+                className={`relative rounded-2xl ${w.color} p-5 shadow-md`}
+                style={{ transform: `rotate(${rot(i)}deg)` }}
+              >
+                <span
+                  className="tape-strip -top-2 left-1/2"
+                  style={{ transform: "translateX(-50%) rotate(-6deg)" }}
+                />
+                <p className="serif text-sm leading-relaxed text-ink">“{w.msg}”</p>
+                <p className="hand mt-3 text-lg text-cherry">— {w.name}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
