@@ -375,14 +375,45 @@ function CoverGate({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 
 function MusicToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
-    <button
-      onClick={onToggle}
-      aria-label={on ? "Pause music" : "Play music"}
-      title={on ? "Pause music" : "Play music"}
-      className="paper fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full text-cherry shadow-md transition hover:scale-105 active:scale-95"
-    >
-      {on ? <Music2 className="h-5 w-5 animate-spin-slow" /> : <Music className="h-5 w-5 opacity-60" />}
-    </button>
+    <div className="fixed bottom-6 right-6 z-40">
+      <button
+        onClick={onToggle}
+        aria-label={on ? "Pause music" : "Play music"}
+        title={on ? "Pause music" : "Play music"}
+        className={`group relative flex h-14 w-14 items-center justify-center rounded-full border shadow-xl backdrop-blur-sm transition-all duration-300 active:scale-95 ${
+          on
+            ? "border-cherry/40 bg-white/95 text-cherry shadow-cherry/25 hover:scale-110"
+            : "border-ink-soft/30 bg-white/85 text-ink-soft shadow-black/10 hover:border-cherry/40 hover:text-cherry hover:scale-105"
+        }`}
+      >
+        {/* Animated ripple rings when playing */}
+        {on && (
+          <>
+            <span className="pointer-events-none absolute -inset-2 animate-ping rounded-full border-2 border-cherry/35 opacity-70" />
+            <span className="pointer-events-none absolute -inset-1 animate-pulse rounded-full bg-cherry/15" />
+          </>
+        )}
+
+        {/* Music icon with distinct active vs paused state */}
+        <div className="relative flex items-center justify-center">
+          {on ? (
+            <div className="relative flex items-center justify-center">
+              <Music2 className="h-6 w-6 animate-[spin_4s_linear_infinite]" />
+              <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cherry opacity-75"></span>
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-cherry"></span>
+              </span>
+            </div>
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <Music className="h-6 w-6 opacity-40" />
+              {/* Slashed bar indicating paused state */}
+              <span className="absolute h-[2px] w-7 rotate-45 rounded-full bg-cherry/70" />
+            </div>
+          )}
+        </div>
+      </button>
+    </div>
   );
 }
 
