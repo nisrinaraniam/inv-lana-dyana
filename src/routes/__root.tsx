@@ -73,13 +73,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Arum & Reza — Our Wedding Invitation" },
+      { title: "Lana & Dyana — Our Wedding Invitation" },
       {
         name: "description",
         content:
-          "With joy in our hearts, we invite you to celebrate the wedding of Arum & Reza. Save the date, RSVP, and share your wishes.",
+          "With joy in our hearts, we invite you to celebrate the wedding of Lana & Dyana. Save the date, RSVP, and share your wishes.",
       },
-      { property: "og:title", content: "Arum & Reza — Our Wedding" },
+      { property: "og:title", content: "Lana & Dyana — Our Wedding" },
       {
         property: "og:description",
         content:

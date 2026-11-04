@@ -28,19 +28,19 @@ import story4 from "@/assets/story-4.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Arum & Reza — Our Wedding Invitation" },
+      { title: "Lana & Dyana — Our Wedding Invitation" },
       {
         name: "description",
         content:
-          "Save the date and celebrate with Arum & Reza — a little illustrated wedding invitation from us to you.",
+          "Save the date and celebrate with Lana & Dyana — a little illustrated wedding invitation from us to you.",
       },
     ],
   }),
   component: Invitation,
 });
 
-const WEDDING_DATE = new Date("2026-11-14T09:00:00+07:00");
-const COUPLE = { bride: "Arum", groom: "Reza" };
+const WEDDING_DATE = new Date("2027-01-15T09:00:00+07:00");
+const COUPLE = { groom: "Lana", bride: "Dyana" };
 
 // ---------- Small building blocks ----------
 
@@ -297,13 +297,13 @@ function CoverGate({ guest, onOpen }: { guest: string; onOpen: () => void }) {
       <div className="animate-fade-up relative z-10 flex max-w-md flex-col items-center text-center">
         <span className="hand text-2xl text-cherry">The Wedding of</span>
         <h1 className="serif mt-2 text-5xl leading-tight text-ink sm:text-6xl">
-          {COUPLE.bride}
-          <span className="mx-3 inline-block align-middle text-cherry">&</span>
           {COUPLE.groom}
+          <span className="mx-3 inline-block align-middle text-cherry">&</span>
+          {COUPLE.bride}
         </h1>
         <div className="mt-4 flex items-center gap-2 text-sm text-ink-soft">
           <Calendar className="h-4 w-4 text-cherry" />
-          <span>Saturday · November 14, 2026</span>
+          <span>Friday · January 15, 2027</span>
         </div>
 
         <div className="animate-float relative mt-6">
@@ -360,9 +360,9 @@ function Hero({ guest }: { guest: string }) {
       <Reveal className="relative z-10 text-center">
         <SectionLabel>The Wedding of</SectionLabel>
         <h1 className="serif mt-4 text-6xl leading-none text-ink sm:text-7xl md:text-8xl">
-          {COUPLE.bride}
-          <span className="mx-2 text-cherry">&</span>
           {COUPLE.groom}
+          <span className="mx-2 text-cherry">&</span>
+          {COUPLE.bride}
         </h1>
         <p className="mt-4 text-sm text-ink-soft">
           To our dearest{" "}
@@ -391,10 +391,10 @@ function Hero({ guest }: { guest: string }) {
 
       <Reveal delay={200} className="relative z-10 mt-8 w-full max-w-md text-center">
         <p className="serif text-lg text-ink">
-          Saturday, 14 November 2026
+          Friday, 15 January 2027
         </p>
         <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">
-          Jakarta · Indonesia
+          Leuwinutug, Bogor · Indonesia
         </p>
         <div className="mt-6">
           <Countdown />
@@ -419,17 +419,17 @@ function Hero({ guest }: { guest: string }) {
 function Couple() {
   const items = [
     {
-      role: "The Bride",
-      name: "Arum Kartika Dewi",
-      parents: "Daughter of Bpk. Suryanto & Ibu Melati",
-      cartoon: cartoonBride,
+      role: "The Groom",
+      name: "Maulana Fajri",
+      parents: "Putra dari Alm. Bpk. Helmi & Ibu Upi Yessi",
+      cartoon: cartoonGroom,
       tape: "-6deg",
     },
     {
-      role: "The Groom",
-      name: "Reza Aditya Pratama",
-      parents: "Son of Bpk. Hendra & Ibu Ratna",
-      cartoon: cartoonGroom,
+      role: "The Bride",
+      name: "Muzayyanah",
+      parents: "Putri dari Bpk. Nawawi & Ibu Hamimah",
+      cartoon: cartoonBride,
       tape: "4deg",
     },
   ];
@@ -437,7 +437,7 @@ function Couple() {
     <section id="couple" className="relative px-4 py-24 sm:py-28">
       <Reveal>
         <SectionLabel>with joy, we introduce</SectionLabel>
-        <SectionTitle>The Bride & Groom</SectionTitle>
+        <SectionTitle>The Groom & Bride</SectionTitle>
         <p className="mx-auto mt-4 max-w-lg text-center text-sm leading-relaxed text-ink-soft">
           Two little hearts, one big adventure. Meet the humans (and their tiny
           cartoon versions) behind this celebration.
@@ -486,27 +486,27 @@ function Couple() {
 function LoveStory() {
   const scenes = [
     {
-      date: "March 2022",
-      title: "First Meeting",
-      text: "A shy hello at a tiny café. Two coffees, one very awkward laugh.",
+      date: "June 2024",
+      title: "Meet",
+      text: "Awal perkenalan dan kisah manis kita yang mulai bersemi.",
       img: story1,
     },
     {
-      date: "August 2022",
-      title: "First Date",
-      text: "Cherry blossoms and holding hands. Definitely, absolutely, official.",
+      date: "December 2025",
+      title: "First Meet",
+      text: "Pertemuan pertama bertatap muka, penuh senyuman dan debar bahagia.",
       img: story2,
     },
     {
-      date: "December 2024",
-      title: "The Proposal",
-      text: "One knee, one ring, and a whole lot of happy tears.",
+      date: "Agustus 2026",
+      title: "Promise Ring",
+      text: "Saling menyematkan cincin janji suci untuk melangkah ke jenjang masa depan.",
       img: story3,
     },
     {
-      date: "November 2026",
+      date: "Januari 2027",
       title: "Our Wedding",
-      text: "Today — we say yes, forever and always.",
+      text: "Hari pernikahan yang dinanti, mengikat janji suci sehidup semati.",
       img: story4,
     },
   ];
@@ -570,18 +570,12 @@ function Events() {
     {
       title: "Akad Nikah",
       icon: <Heart className="h-5 w-5 fill-cherry text-cherry" />,
-      date: "Saturday, 14 November 2026",
-      time: "09:00 – 11:00 WIB",
-      place: "Griya Melati Hall",
-      note: "An intimate ceremony with family & close friends.",
-    },
-    {
-      title: "Resepsi",
-      icon: <Cake className="h-5 w-5 text-cherry" />,
-      date: "Saturday, 14 November 2026",
-      time: "18:00 – 22:00 WIB",
-      place: "Griya Melati Grand Ballroom",
-      note: "Dinner, dancing, and a lot of cake.",
+      date: "Friday, 15 January 2027",
+      time: "09:00 WIB – Selesai",
+      place: "Kediaman Mempelai Wanita (Ds. Leuwinutug)",
+      note: "Momen sakral ijab kabul & syukuran bersama keluarga dan sahabat tercinta.",
+      calendarUrl:
+        "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Akad+Nikah+Lana+%26+Dyana&dates=20270115T020000Z/20270115T060000Z&details=Akad+Nikah+Maulana+Fajri+%26+Muzayyanah&location=Ds.+Leuwinutug%2C+Citeureup%2C+Bogor",
     },
   ];
   return (
@@ -592,12 +586,12 @@ function Events() {
       <FloatingHearts count={4} />
       <Reveal>
         <SectionLabel>save the day</SectionLabel>
-        <SectionTitle>Wedding Events</SectionTitle>
+        <SectionTitle>Wedding Event</SectionTitle>
       </Reveal>
       <Divider />
-      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+      <div className="mx-auto flex max-w-xl justify-center">
         {events.map((e, i) => (
-          <Reveal key={e.title} delay={i * 150}>
+          <Reveal key={e.title} delay={i * 150} className="w-full">
             <div className="paper relative rounded-[2rem] p-7 text-center">
               <span
                 className="tape-strip -top-3 left-1/2 -translate-x-1/2"
@@ -622,10 +616,15 @@ function Events() {
                 </p>
               </div>
               <p className="hand mt-4 text-lg text-cherry">{e.note}</p>
-              <button className="mt-5 inline-flex items-center gap-2 rounded-full border border-cherry/30 px-5 py-2 text-sm text-cherry transition hover:bg-cherry hover:text-primary-foreground">
+              <a
+                href={e.calendarUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-full border border-cherry/30 px-5 py-2 text-sm text-cherry transition hover:bg-cherry hover:text-primary-foreground"
+              >
                 <Calendar className="h-4 w-4" />
                 Add to Calendar
-              </button>
+              </a>
             </div>
           </Reveal>
         ))}
@@ -667,14 +666,13 @@ function Venue() {
         <Reveal delay={120}>
           <div className="space-y-5">
             <div>
-              <span className="hand text-xl text-cherry">Griya Melati</span>
+              <span className="hand text-xl text-cherry">Kediaman Mempelai Wanita</span>
               <h3 className="serif mt-1 text-3xl text-ink">
-                Grand Ballroom & Garden
+                Ds. Leuwinutug, Citeureup
               </h3>
             </div>
             <p className="text-sm leading-relaxed text-ink-soft">
-              Jl. Cendana Kasih No. 88, Menteng, Jakarta Pusat 10310,
-              Indonesia.
+              Jl. Anyar, Leuwinutug, Kec. Citeureup, Kabupaten Bogor, Jawa Barat 16810.
             </p>
 
             <div className="paper rounded-2xl p-4 text-sm text-ink-soft">
@@ -682,14 +680,14 @@ function Venue() {
                 <Sparkles className="h-4 w-4 text-cherry" /> Travel tips
               </p>
               <ul className="ml-1 list-disc space-y-1 pl-4">
-                <li>Parking available on-site (valet from 17:00).</li>
-                <li>5 min from Gondangdia MRT · 15 min from Sudirman.</li>
-                <li>Please arrive 20 minutes before the ceremony 🌸</li>
+                <li>Akses mudah melalui Tol Jagorawi (Exit Tol Citeureup).</li>
+                <li>Lokasi berada di Jl. Anyar, Ds. Leuwinutug.</li>
+                <li>Mohon hadir 15-20 menit sebelum acara akad dimulai 🌸</li>
               </ul>
             </div>
 
             <a
-              href="https://maps.google.com/?q=Jakarta"
+              href="https://maps.app.goo.gl/2PerHnSgRHo84aB39?g_st=ic"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-cherry px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-cherry/25 transition hover:brightness-110"
@@ -835,8 +833,8 @@ function GiftSection() {
   };
 
   const accounts = [
-    { bank: "BCA", num: "1234567890", name: "Arum Kartika Dewi" },
-    { bank: "Mandiri", num: "0987654321", name: "Reza Aditya Pratama" },
+    { bank: "SeaBank", num: "901195226293", name: "Maulana Fajri" },
+    { bank: "SeaBank", num: "901765085969", name: "Musayyanah" },
   ];
 
   return (
@@ -878,7 +876,7 @@ function GiftSection() {
           {open && (
             <div className="animate-fade-up mt-4 space-y-3">
               {accounts.map((a) => (
-                <div key={a.bank} className="paper rounded-2xl p-4">
+                <div key={a.num} className="paper rounded-2xl p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-widest text-ink-soft">
@@ -888,10 +886,10 @@ function GiftSection() {
                       <p className="text-xs text-ink-soft">a.n. {a.name}</p>
                     </div>
                     <button
-                      onClick={() => copy(a.num, a.bank)}
+                      onClick={() => copy(a.num, a.num)}
                       className="inline-flex items-center gap-1.5 rounded-full border border-cherry/30 px-3 py-1.5 text-xs text-cherry hover:bg-cherry hover:text-primary-foreground"
                     >
-                      {copied === a.bank ? (
+                      {copied === a.num ? (
                         <>
                           <Check className="h-3.5 w-3.5" /> Copied
                         </>
@@ -1066,10 +1064,10 @@ function Closing() {
           soon — with cake, confetti, and a very tight hug.
         </p>
         <p className="hand mt-6 text-4xl text-cherry">
-          {COUPLE.bride} <Heart className="mx-1 inline h-6 w-6 fill-cherry" /> {COUPLE.groom}
+          {COUPLE.groom} <Heart className="mx-1 inline h-6 w-6 fill-cherry" /> {COUPLE.bride}
         </p>
         <p className="mt-8 text-xs uppercase tracking-[0.3em] text-ink-soft/70">
-          Jakarta · 14.11.2026
+          Leuwinutug, Bogor · 15.01.2027
         </p>
       </Reveal>
     </section>
