@@ -902,17 +902,7 @@ function GiftSection() {
                   </div>
                 </div>
               ))}
-              <div className="paper flex items-center justify-between rounded-2xl p-4">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-ink-soft">
-                    QRIS
-                  </p>
-                  <p className="serif text-lg text-ink">Scan to send love</p>
-                </div>
-                <div className="grid h-20 w-20 place-items-center rounded-xl bg-white p-2 shadow-inner">
-                  <QrDoodle />
-                </div>
-              </div>
+              {/* QRIS hidden */}
             </div>
           )}
         </div>
