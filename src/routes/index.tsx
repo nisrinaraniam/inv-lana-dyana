@@ -241,6 +241,7 @@ function Countdown() {
 function Invitation() {
   const [opened, setOpened] = useState(false);
   const [music, setMusic] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const guest = useGuestName();
 
   // Lock scroll before opening
@@ -255,11 +256,44 @@ function Invitation() {
     };
   }, [opened]);
 
+  const handleOpen = () => {
+    setOpened(true);
+    if (audioRef.current) {
+      audioRef.current
+        .play()
+        .then(() => {
+          setMusic(true);
+        })
+        .catch((err) => {
+          console.warn("Autoplay was prevented:", err);
+        });
+    }
+  };
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (music) {
+      audioRef.current.pause();
+      setMusic(false);
+    } else {
+      audioRef.current
+        .play()
+        .then(() => {
+          setMusic(true);
+        })
+        .catch((err) => {
+          console.warn("Play failed:", err);
+        });
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-ivory text-ink">
-      {!opened && <CoverGate guest={guest} onOpen={() => setOpened(true)} />}
+      <audio ref={audioRef} src="/audio.mp3" loop preload="auto" />
 
-      {opened && <MusicToggle on={music} onToggle={() => setMusic((m) => !m)} />}
+      {!opened && <CoverGate guest={guest} onOpen={handleOpen} />}
+
+      {opened && <MusicToggle on={music} onToggle={toggleMusic} />}
 
       <Hero guest={guest} />
       <Couple />
@@ -277,7 +311,7 @@ function Invitation() {
 // ---------- Cover gate ----------
 
 function useGuestName() {
-  const [name, setName] = useState("Dear Guest");
+  const [name, setName] = useState("Bapak/Ibu Saudara/i di Tempat");
   useEffect(() => {
     try {
       const p = new URLSearchParams(window.location.search);
@@ -316,7 +350,12 @@ function CoverGate({ guest, onOpen }: { guest: string; onOpen: () => void }) {
           />
         </div>
 
-        <p className="hand mt-4 text-3xl text-cherry">{guest}</p>
+        <p className="mt-4 text-xs uppercase tracking-widest text-ink-soft">
+          Kepada Yth.
+        </p>
+        <p className="hand mt-1 max-w-xs px-2 text-center text-2xl text-cherry sm:text-3xl">
+          {guest}
+        </p>
 
         <button
           onClick={onOpen}
@@ -338,10 +377,11 @@ function MusicToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <button
       onClick={onToggle}
-      aria-label="Toggle music"
-      className="paper fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full text-cherry"
+      aria-label={on ? "Pause music" : "Play music"}
+      title={on ? "Pause music" : "Play music"}
+      className="paper fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full text-cherry shadow-md transition hover:scale-105 active:scale-95"
     >
-      {on ? <Music2 className="h-5 w-5 animate-spin-slow" /> : <Music className="h-5 w-5" />}
+      {on ? <Music2 className="h-5 w-5 animate-spin-slow" /> : <Music className="h-5 w-5 opacity-60" />}
     </button>
   );
 }
@@ -365,8 +405,8 @@ function Hero({ guest }: { guest: string }) {
           {COUPLE.bride}
         </h1>
         <p className="mt-4 text-sm text-ink-soft">
-          To our dearest{" "}
-          <span className="hand text-lg text-cherry">{guest}</span>, with love —
+          Kepada Yth.{" "}
+          <span className="hand text-lg text-cherry">{guest}</span>
         </p>
       </Reveal>
 
