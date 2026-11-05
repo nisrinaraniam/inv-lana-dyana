@@ -1060,19 +1060,22 @@ function Wishes() {
     setSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("name", trimmedName);
-      formData.append("nama", trimmedName);
-      formData.append("msg", trimmedMsg);
-      formData.append("message", trimmedMsg);
-      formData.append("ucapan", trimmedMsg);
-      formData.append("pesan", trimmedMsg);
-      formData.append("timestamp", new Date().toISOString());
+      // Google Apps Script: use GET with query params (most reliable no-cors method)
+      const params = new URLSearchParams({
+        name: trimmedName,
+        nama: trimmedName,
+        msg: trimmedMsg,
+        message: trimmedMsg,
+        ucapan: trimmedMsg,
+        pesan: trimmedMsg,
+        timestamp: new Date().toISOString(),
+        action: "addWish",
+      });
 
-      await fetch(GOOGLE_SCRIPT_WISHES_URL, {
-        method: "POST",
+      // Primary: fetch GET (no-cors safe, GAS reads via e.parameter)
+      await fetch(`${GOOGLE_SCRIPT_WISHES_URL}?${params.toString()}`, {
+        method: "GET",
         mode: "no-cors",
-        body: formData,
       });
     } catch (err) {
       console.error("Failed to post wish to Google Apps Script:", err);
