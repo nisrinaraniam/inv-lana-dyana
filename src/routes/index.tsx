@@ -982,7 +982,7 @@ function QrDoodle() {
 // ---------- Wishes ----------
 
 const GOOGLE_SCRIPT_WISHES_URL =
-  "https://script.google.com/macros/s/AKfycbynKXlR6IdpEOKNk2q0NmqyfU3PaOZTE40-2iOsfqbNAhohGk-eGtB7ZcVaisbTt0MC/exec";
+  "https://script.google.com/macros/s/AKfycbxkFfL5_zmDfCfbwz1mfI-QkUYwI7SD4jnb3IQI-m9obBuIyXL0V-A97O9mcdz6Qm0/exec";
 
 type Wish = { name: string; msg: string; color: string; date?: string };
 
