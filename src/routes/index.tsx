@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
   component: Invitation,
 });
 
-const WEDDING_DATE = new Date("2027-01-15T09:00:00+07:00");
+const WEDDING_DATE = new Date("2027-01-17T09:00:00+07:00");
 const COUPLE = { groom: "Lana", bride: "Dyana" };
 
 // ---------- Small building blocks ----------
@@ -338,7 +338,7 @@ function CoverGate({ guest, onOpen }: { guest: string; onOpen: () => void }) {
         </h1>
         <div className="mt-4 flex items-center gap-2 text-sm text-ink-soft">
           <Calendar className="h-4 w-4 text-cherry" />
-          <span>Friday · January 15, 2027</span>
+          <span>Sunday · January 17, 2027</span>
         </div>
 
         <div className="animate-float relative mt-6">
@@ -443,7 +443,7 @@ function Hero({ guest }: { guest: string }) {
 
       <Reveal delay={200} className="relative z-10 mt-8 w-full max-w-md text-center">
         <p className="serif text-lg text-ink">
-          Friday, 15 January 2027
+          Sunday, 17 January 2027
         </p>
         <p className="text-xs uppercase tracking-[0.25em] text-ink-soft">
           Leuwinutug, Bogor · Indonesia
@@ -622,12 +622,12 @@ function Events() {
     {
       title: "Akad Nikah",
       icon: <Heart className="h-5 w-5 fill-cherry text-cherry" />,
-      date: "Friday, 15 January 2027",
+      date: "Sunday, 17 January 2027",
       time: "09:00 WIB – Selesai",
       place: "Kediaman Mempelai Wanita (Ds. Leuwinutug)",
       note: "Momen sakral ijab kabul & syukuran bersama keluarga dan sahabat tercinta.",
       calendarUrl:
-        "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Akad+Nikah+Lana+%26+Dyana&dates=20270115T020000Z/20270115T060000Z&details=Akad+Nikah+Maulana+Fajri+%26+Muzayyanah&location=Ds.+Leuwinutug%2C+Citeureup%2C+Bogor",
+        "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Akad+Nikah+Lana+%26+Dyana&dates=20270117T020000Z/20270117T060000Z&details=Akad+Nikah+Maulana+Fajri+%26+Muzayyanah&location=Ds.+Leuwinutug%2C+Citeureup%2C+Bogor",
     },
   ];
   return (
@@ -1199,7 +1199,7 @@ function Closing() {
           {COUPLE.groom} <Heart className="mx-1 inline h-6 w-6 fill-cherry" /> {COUPLE.bride}
         </p>
         <p className="mt-8 text-xs uppercase tracking-[0.3em] text-ink-soft/70">
-          Leuwinutug, Bogor · 15.01.2027
+          Leuwinutug, Bogor · 17.01.2027
         </p>
       </Reveal>
     </section>
