@@ -7,7 +7,8 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect;
+import { initSecurity } from '../lib/security';, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -109,6 +110,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+
+function SecurityGuard() {
+  useEffect(() => {
+    return initSecurity();
+  }, []);
+  return null;
+}
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
@@ -116,6 +124,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <SecurityGuard />
         {children}
         <Scripts />
       </body>
