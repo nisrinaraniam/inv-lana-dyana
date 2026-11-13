@@ -7,8 +7,8 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect;
-import { initSecurity } from '../lib/security';, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { initSecurity } from "../lib/security";
 
 import appCss from "../styles.css?url";
 
